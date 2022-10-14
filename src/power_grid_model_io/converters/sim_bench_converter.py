@@ -7,6 +7,7 @@ Sim Bench Converter: Download, extract and convert a sim bench dataset to PGM
 
 import re
 from pathlib import Path
+from tempfile import gettempdir
 from typing import Optional
 
 import pandas as pd
@@ -33,7 +34,7 @@ class SimBenchConverter(TabularConverter):
         super().__init__(mapping_file=DEFAULT_MAPPING_FILE)
         self.simbench_code: Optional[str] = simbench_code
         self._download_url: Optional[str] = None
-        self._cache_dir: Optional[Path] = cache_dir
+        self._cache_dir: Path = cache_dir or Path(gettempdir())
         if simbench_code is not None:
             self.set_download_url(DEFAULT_DOWNLOAD_URL.format(simbench_code=simbench_code))
 
@@ -55,9 +56,9 @@ class SimBenchConverter(TabularConverter):
         For SimBench files Node columns can be called nodeA, nodeB, etc. Therefore, the id column of the nodes is
         renamed to node_id and all nodeXX columns are also renamed to node_id.
         """
-        data = dict(sorted(row.to_dict().items(), key=lambda x: str(x[0])))
-        data = {NODE_PATTERN.sub(col, "node_id"): val for col, val in data}
+        data = {NODE_PATTERN.sub(col, "node_id"): val for col, val in row.to_dict().items()}
         if component == "node":
             data = {"node_id" if col == "id" else col: val for col, val in data.items()}
-        key = component + ":" + ",".join(f"{k}={v}" for k, v in data.items())
+        items = sorted(data.items(), key=lambda x: str(x[0]))
+        key = component + ":" + ",".join(f"{k}={v}" for k, v in items)
         return self._lookup(item={"component": component, "row": data}, key=key)
