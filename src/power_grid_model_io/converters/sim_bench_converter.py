@@ -28,13 +28,13 @@ class SimBenchConverter(TabularConverter):
     Sim Bench Converter: Download, extract and convert a sim bench dataset to PGM
     """
 
-    __slots__ = ("_simbench_code", "_download_url", "_cache_dir")
+    __slots__ = ("_simbench_code", "_download_url", "_download_dir")
 
-    def __init__(self, simbench_code: Optional[str] = None, cache_dir: Optional[Path] = None):
+    def __init__(self, simbench_code: Optional[str] = None, download_dir: Optional[Path] = None):
         super().__init__(mapping_file=DEFAULT_MAPPING_FILE)
         self.simbench_code: Optional[str] = simbench_code
         self._download_url: Optional[str] = None
-        self._cache_dir: Path = cache_dir or Path(gettempdir())
+        self._download_dir: Path = download_dir or Path(gettempdir())
         if simbench_code is not None:
             self.set_download_url(DEFAULT_DOWNLOAD_URL.format(simbench_code=simbench_code))
 
@@ -46,7 +46,12 @@ class SimBenchConverter(TabularConverter):
 
     def _load_data(self, data: Optional[TabularData]) -> TabularData:
         if data is None and self._source is None and self._download_url is not None:
-            csv_dir = download_and_extract(self._download_url, dir_path=self._cache_dir)
+            try:
+                csv_dir = download_and_extract(self._download_url, dir_path=self._download_dir)
+            except ValueError as ex:
+                if str(ex).endswith(".download"):
+                    raise ValueError(f"Invalid SimBench dataset URL: {self._download_url}") from None
+                raise ex
             self._source = CsvDirStore(csv_dir, delimiter=";")
         return super()._load_data(data=data)
 

@@ -73,6 +73,7 @@ class JsonFileStore(BaseDataStore[StructuredData]):
             max_level = 3
             if isinstance(data, list):
                 max_level += 1
+            self._file_path.parent.mkdir(parents=True, exist_ok=True)
             with self._file_path.open(mode="w", encoding="utf-8") as file_pointer:
                 compact_json_dump(data, file_pointer, indent=self._indent, max_level=max_level)
         else:
