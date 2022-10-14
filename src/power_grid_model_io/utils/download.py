@@ -58,7 +58,10 @@ def download(
     Returns:
         The path to the downloaded file
     """
-    remote_size, remote_file_name = get_url_size_and_file_name(url=url)
+    status_code, remote_size, remote_file_name = get_url_headers(url=url)
+    if status_code != 200:
+        raise IOError(f"Could not download from URL, status={status_code}")
+
     if file_path is None and remote_file_name:
         file_path = Path(remote_file_name)
 
@@ -110,7 +113,7 @@ def download(
     return file_path
 
 
-def get_url_size_and_file_name(url: str) -> Tuple[int, str]:
+def get_url_headers(url: str) -> Tuple[int, int, str]:
     """
     Retrieve the file size of a given URL (based on it's header)
 
@@ -121,12 +124,13 @@ def get_url_size_and_file_name(url: str) -> Tuple[int, str]:
         The file size in bytes
     """
     with request.urlopen(url) as context:
+        status_code = context.status
         headers = context.headers
     file_size = int(headers.get("Content-Length", 0))
     matches = re.findall(r"filename=\"(.+)\"", headers.get("Content-Disposition", ""))
     file_name = matches[0] if matches else None
 
-    return file_size, file_name
+    return status_code, file_size, file_name
 
 
 def get_download_path(dir_path: Optional[Path], file_path: Optional[Path], data=Optional[ByteString]) -> Path:
