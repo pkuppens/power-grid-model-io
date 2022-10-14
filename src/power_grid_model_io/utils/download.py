@@ -189,7 +189,7 @@ def extract(src_file_path: Path, dst_dir_path: Optional[Path] = None, skip_if_ex
             raise NotADirectoryError(f"Destination dir {dst_dir_path} exists and is not a directory")
         if not skip_if_exists:
             raise FileExistsError(f"Destination dir {dst_dir_path} exists and is not empty")
-        log.debug("Skip extraction, destiation dir exists")
+        log.debug("Skip extraction, destination dir exists")
 
     else:
         # Create the destination directory
