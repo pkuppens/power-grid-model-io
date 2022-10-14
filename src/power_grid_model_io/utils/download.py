@@ -18,17 +18,17 @@ from tqdm import tqdm
 
 
 def download_and_extract(
-    url: str, file_path: Optional[Path] = None, dir_path: Optional[Path] = None, overwrite: bool = False
+    url: str, dir_path: Optional[Path] = None, file_path: Optional[Path] = None, overwrite: bool = False
 ) -> Path:
     """
     Download a file from a URL and store it locally, extract the contents and return the path to the contents.
 
     Args:
         url:       The url to the .zip file
-        file_path: An optional file path (absolute or relative to dir_path). If no file_path is given, a file name is
-                   generated based on the url
         dir_path:  An optional dir path to store the downloaded file. If no dir_path is given the current working dir
                    will be used.
+        file_path: An optional file path (absolute or relative to dir_path). If no file_path is given, a file name is
+                   generated based on the url
         overwrite: Should we download the file, even if we have downloaded already (and the file size still matches)?
 
     Returns:
