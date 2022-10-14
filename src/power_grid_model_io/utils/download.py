@@ -14,7 +14,7 @@ from typing import ByteString, Callable, Optional, Tuple
 from urllib import request
 
 import structlog
-import tqdm
+from tqdm import tqdm
 
 
 def download_and_extract(
@@ -81,7 +81,7 @@ def download(
     else:
         log.debug("Downloading file")
 
-    def progress_hook(progress_bar: tqdm.tqdm) -> Callable[[int, int, int], None]:
+    def progress_hook(progress_bar: tqdm) -> Callable[[int, int, int], None]:
         last_block = [0]
 
         def update_progress_bar(block_num: int, block_size: int, file_size: int) -> None:
@@ -93,7 +93,7 @@ def download(
         return update_progress_bar
 
     # Download to a temp file first, so the results are not stored if the transfer fails
-    with tqdm.tqdm(desc=url, unit="B", unit_scale=True, leave=True) as progress_bar:
+    with tqdm(desc="Downloading", unit="B", unit_scale=True, leave=True) as progress_bar:
         temp_file, _headers = request.urlretrieve(url, reporthook=progress_hook(progress_bar))
 
     # Check if the file contains any content
@@ -190,16 +190,16 @@ def extract(src_file_path: Path, dst_dir_path: Optional[Path] = None, skip_if_ex
         if not skip_if_exists:
             raise FileExistsError(f"Destination dir {dst_dir_path} exists and is not empty")
         log.debug("Skip extraction, destiation dir exists")
-        return dst_dir_path
 
-    # Create the destination directory
-    dst_dir_path.mkdir(parents=True, exist_ok=True)
+    else:
+        # Create the destination directory
+        dst_dir_path.mkdir(parents=True, exist_ok=True)
 
-    # Extract per file, so we can show a progress bar
-    with zipfile.ZipFile(src_file_path, "r") as zip_file:
-        file_list = zip_file.namelist()
-        for file_path in tqdm.tqdm(desc=str(src_file_path), iterable=file_list, total=len(file_list), unit="file"):
-            zip_file.extract(member=file_path, path=dst_dir_path)
+        # Extract per file, so we can show a progress bar
+        with zipfile.ZipFile(src_file_path, "r") as zip_file:
+            file_list = zip_file.namelist()
+            for file_path in tqdm(desc="Extracting", iterable=file_list, total=len(file_list), unit="file", leave=True):
+                zip_file.extract(member=file_path, path=dst_dir_path)
 
     # If the zip files contains a single directory with the same name as the zip file, return that dir
     contents = list(dst_dir_path.iterdir())
