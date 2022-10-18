@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import logging
+from pathlib import Path
 from time import time
 
 import structlog
@@ -17,7 +18,7 @@ log = structlog.get_logger(__name__)
 
 # Load source
 simbench_code = "1-complete_data-mixed-all-0-sw"
-simbench_converter = SimBenchConverter(simbench_code, download_dir=None)
+simbench_converter = SimBenchConverter(simbench_code)
 
 # Convert to PGM
 start = time()
