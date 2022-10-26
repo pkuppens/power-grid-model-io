@@ -148,9 +148,9 @@ def get_download_path(dir_path: Optional[Path], file_path: Optional[Path], data=
     # If no file_path is given, generate a file name
     if file_path is None:
         try:
-            md5 = hashlib.md5()
-            md5.update(data)
-            hash_str = md5.hexdigest()
+            sha1 = hashlib.sha1()
+            sha1.update(data)
+            hash_str = sha1.hexdigest()
         except (TypeError, ValueError) as ex:
             raise ValueError(f"Can't auto generate a file name for a {type(data).__name__}.") from ex
         file_path = Path(__name__) / f"{hash_str}.download"
