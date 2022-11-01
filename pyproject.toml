@@ -29,7 +29,7 @@ classifiers=[
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "numpy",
+    "numpy>=1.20",
     "openpyxl",
     "pandas",
     "power_grid_model>=1.4",
@@ -45,6 +45,15 @@ dev = [
     "pylint",
     "pytest",
     "pytest-cov",
+    "pydantic", # Used in unit tests
+]
+doc = [
+    "sphinx",
+    "myst-parser",
+    "sphinx_rtd_theme",
+    "readthedocs-sphinx-search",
+    "sphinx-hoverxref",
+    "numpydoc",
 ]
 cli = [
     "typer[all]",
@@ -52,6 +61,7 @@ cli = [
 
 [project.urls]
 Home-page = "https://github.com/alliander-opensource/power-grid-model-io"
+Documentation = "https://power-grid-model-io.readthedocs.io/en/stable/"
 
 [project.scripts]
 pgm_convert = "power_grid_model_io.cli.convert:app"
@@ -65,7 +75,7 @@ namespaces = false
 version = {file = "PYPI_VERSION"}
 
 [tool.setuptools.package-data]
-power_grid_model_io = ["*.yaml"]
+power_grid_model_io = ["config/**/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
