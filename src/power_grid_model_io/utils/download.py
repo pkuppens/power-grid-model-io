@@ -175,7 +175,7 @@ def extract(src_file_path: Path, dst_dir_path: Optional[Path] = None, skip_if_ex
 
     Args:
         src_file_path: The .zip file to extract.
-        src_file_path: An optional destination path. If none is given, the src_file_path wihout .zip extension is used.
+        dst_dir_path: An optional destination path. If none is given, the src_file_path without .zip extension is used.
         skip_if_exists: If true, it returns the dir path, otherwise raise an exception.
 
     Returns: The path where the files are extracted
