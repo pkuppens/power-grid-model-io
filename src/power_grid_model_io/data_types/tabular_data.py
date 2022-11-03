@@ -62,11 +62,6 @@ class TabularData:
         column_data = table_data[column_name]
 
         if isinstance(column_data, np.ndarray):
-            self._log.warning(
-                "Implicitly copying a numpy array and converting it to a pandas DataFrame",
-                table_name=table_name,
-                column_name=column_name,
-            )
             column_data = pd.Series(column_data, name=column_name)
 
         # If unit information is available, convert the unit
@@ -86,12 +81,9 @@ class TabularData:
 
         # Find substitutions, ignore if none is found
         try:
-            substitutions = self._substitution.get_substitutions(field=f"{table}.{field}")
+            substitutions = self._substitution.get_substitutions(attr=field, table=table)
         except KeyError:
-            try:
-                substitutions = self._substitution.get_substitutions(field=field)
-            except KeyError:
-                return column_data
+            return column_data
 
         if substitutions is None:  # No substitution defined, for this column
             return column_data
