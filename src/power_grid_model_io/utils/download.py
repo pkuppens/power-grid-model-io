@@ -148,9 +148,9 @@ def get_download_path(dir_path: Optional[Path], file_path: Optional[Path], data=
     # If no file_path is given, generate a file name
     if file_path is None:
         try:
-            md5 = hashlib.md5()
-            md5.update(data)
-            hash_str = md5.hexdigest()
+            sha256 = hashlib.sha256()
+            sha256.update(data)
+            hash_str = sha256.hexdigest()
         except (TypeError, ValueError) as ex:
             raise ValueError(f"Can't auto generate a file name for a {type(data).__name__}.") from ex
         file_path = Path(__name__) / f"{hash_str}.download"
@@ -175,7 +175,7 @@ def extract(src_file_path: Path, dst_dir_path: Optional[Path] = None, skip_if_ex
 
     Args:
         src_file_path: The .zip file to extract.
-        src_file_path: An optional destination path. If none is given, the src_file_path wihout .zip extension is used.
+        dst_dir_path: An optional destination path. If none is given, the src_file_path without .zip extension is used.
         skip_if_exists: If true, it returns the dir path, otherwise raise an exception.
 
     Returns: The path where the files are extracted
