@@ -70,6 +70,7 @@ class TabularData:
                     f"The '{column_name}' column should now be unitless, "
                     f"but it still contains a unit: {column_data.columns.values}"
                 )
+
         return self._apply_value_substitution(column_data=column_data, table=table_name, field=column_name)
 
     def _apply_value_substitution(self, column_data: pd.Series, table: str, field: str) -> pd.Series:
@@ -79,12 +80,9 @@ class TabularData:
 
         # Find substitutions, ignore if none is found
         try:
-            substitutions = self._substitution.get_substitutions(field=f"{table}.{field}")
+            substitutions = self._substitution.get_substitutions(attr=field, table=table)
         except KeyError:
-            try:
-                substitutions = self._substitution.get_substitutions(field=field)
-            except KeyError:
-                return column_data
+            return column_data
 
         if substitutions is None:  # No substitution defined, for this column
             return column_data
