@@ -4,7 +4,8 @@
 """
 Automatic ID generator class
 """
-from typing import Any, Dict, Hashable, List, Optional
+import collections
+from typing import Any, Dict, Hashable, List, Optional, Union
 
 
 class AutoID:
@@ -41,7 +42,7 @@ class AutoID:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._keys: Dict[Hashable, int] = {}
         self._items: List[Any] = []
 
@@ -65,11 +66,11 @@ class AutoID:
 
             # If no key is supplied, use the item as a key
         if key is None:
-            if item.__hash__ is None:
+            if not isinstance(item, collections.abc.Hashable):
                 raise TypeError(
                     f"Unhashable type: '{type(item).__name__}', please supply a 'key' argument or use hashable items"
                 )
-            key = item.__hash__()
+            key = item
 
         # If an ID was already generated for this key, return the previously generated id
         if key in self._keys:
@@ -90,6 +91,22 @@ class AutoID:
 
         # Return the numeric id
         return idx
+
+    def __contains__(self, item: Union[int, Hashable]) -> bool:
+        """
+        Check if the id, or the item exists
+
+        Args:
+            item: the numerical index, or the original key (or item) for which the index was created
+
+        Returns:
+            True if the item exists
+        """
+        if isinstance(item, int):
+            return 0 <= item < len(self._items)
+        if not isinstance(item, collections.abc.Hashable):
+            return False
+        return item in self._keys
 
     def __getitem__(self, idx: int) -> Any:
         """

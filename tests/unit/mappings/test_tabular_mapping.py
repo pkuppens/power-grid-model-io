@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+import pytest
 from pytest import fixture, raises
 
 from power_grid_model_io.mappings.tabular_mapping import TabularMapping
@@ -9,6 +10,7 @@ from power_grid_model_io.mappings.tabular_mapping import TabularMapping
 
 @fixture
 def mapping() -> TabularMapping:
+    # Arrange
     return TabularMapping(
         {
             "Nodes": {"node": {"id": "ID"}},
@@ -62,8 +64,8 @@ def test_instances(mapping: TabularMapping):
 
 def test_instances__exception():
     # Arrange
-    mapping = TabularMapping({"Nodes": [{"node": {"id": "ID"}}]})  # type: ignore
+    mapping = TabularMapping({"Nodes": [1, 2, 3]})  # type: ignore
 
-    # Act and Assert
-    with raises(TypeError):
+    # Act / Assert
+    with pytest.raises(TypeError, match="Invalid table mapping for Nodes; expected a dictionary got list"):
         next(mapping.instances(table="Nodes"))
