@@ -11,6 +11,8 @@ from structlog.testing import capture_logs
 from power_grid_model_io.converters.pgm_json_converter import PgmJsonConverter
 from power_grid_model_io.data_types import ExtraInfoLookup
 
+from ...utils import assert_log_match
+
 
 @pytest.fixture
 def converter():
@@ -57,7 +59,7 @@ def pgm_sparse_batch_data():
     return {"component_name": array}
 
 
-def test_converter__parse_data(converter: PgmJsonConverter, structured_input_data, structured_batch_data):
+def test_parse_data(converter: PgmJsonConverter, structured_input_data, structured_batch_data):
     with pytest.raises(TypeError, match="Raw data should be either a list or a dictionary!"):
         converter._parse_data(data="str", data_type="input", extra_info=None)  # type: ignore
 
@@ -78,7 +80,7 @@ def test_converter__parse_data(converter: PgmJsonConverter, structured_input_dat
     assert (pgm_batch_data["sym_load"]["data"]["p_specified"] == [1.0, 2.0, 3.0]).all()
 
 
-def test_converter__parse_dataset(converter: PgmJsonConverter, structured_input_data):
+def test_parse_dataset(converter: PgmJsonConverter, structured_input_data):
     extra_info: ExtraInfoLookup = {}
     pgm_data = converter._parse_dataset(data=structured_input_data, data_type="input", extra_info=extra_info)
 
@@ -89,7 +91,7 @@ def test_converter__parse_dataset(converter: PgmJsonConverter, structured_input_
     assert extra_info == {2: {"some_extra_info": 2.1}}
 
 
-def test_converter__parse_component(converter: PgmJsonConverter, structured_input_data):
+def test_parse_component(converter: PgmJsonConverter, structured_input_data):
     objects = list(structured_input_data.values())
     component = "node"
     extra_info: ExtraInfoLookup = {}
@@ -110,19 +112,16 @@ def test_converter__parse_component(converter: PgmJsonConverter, structured_inpu
         converter._parse_component(objects=objects[0], component=component, data_type="input", extra_info=None)
 
 
-def test_converter__serialize_data(
-    converter: PgmJsonConverter, pgm_input_data: SingleDataset, pgm_batch_data: BatchDataset
-):
+def test_serialize_data(converter: PgmJsonConverter, pgm_input_data: SingleDataset, pgm_batch_data: BatchDataset):
     structured_single_data = converter._serialize_data(data=pgm_input_data, extra_info=None)
     assert structured_single_data == {"node": [{"id": 1}, {"id": 2}]}
     with capture_logs() as cap_log:
         structured_batch_data = converter._serialize_data(data=pgm_batch_data, extra_info={})
     assert structured_batch_data == [{"line": [{}, {}]}, {"line": [{}, {}]}, {"line": [{}, {}]}]
-    assert cap_log[0]["event"] == "Extra info is not supported for batch data export"
-    assert cap_log[0]["log_level"] == "warning"
+    assert_log_match(cap_log[0], "warning", "Extra info is not supported for batch data export")
 
 
-def test_converter__is_batch(
+def test_is_batch(
     converter: PgmJsonConverter,
     pgm_input_data: SingleDataset,
     pgm_batch_data: BatchDataset,
@@ -140,9 +139,7 @@ def test_converter__is_batch(
         converter._is_batch(combined_input_batch)
 
 
-def test_converter__serialize_dataset(
-    converter: PgmJsonConverter, pgm_input_data: SingleDataset, pgm_batch_data: BatchDataset
-):
+def test_serialize_dataset(converter: PgmJsonConverter, pgm_input_data: SingleDataset, pgm_batch_data: BatchDataset):
     with pytest.raises(ValueError, match="Invalid data format"):
         converter._serialize_dataset(data={"node": "attribute"}, extra_info=None)  # type: ignore
     with pytest.raises(ValueError, match="Invalid data format"):
@@ -151,6 +148,6 @@ def test_converter__serialize_dataset(
     structured_data = converter._serialize_dataset(data=pgm_input_data, extra_info=None)
     assert structured_data == {"node": [{"id": 1}, {"id": 2}]}
 
-    extra_info = {1: {"dummy": "data"}}
+    extra_info: ExtraInfoLookup = {1: {"dummy": "data"}}
     structured_data_with_extra_info = converter._serialize_dataset(data=pgm_input_data, extra_info=extra_info)
     assert structured_data_with_extra_info == {"node": [{"id": 1, "dummy": "data"}, {"id": 2}]}
