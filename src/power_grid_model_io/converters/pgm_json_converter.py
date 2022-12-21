@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 Contributors to the Power Grid Model IO project <dynamic.grid.calculation@alliander.com>
+# SPDX-FileCopyrightText: 2022 Contributors to the Power Grid Model project <dynamic.grid.calculation@alliander.com>
 #
 # SPDX-License-Identifier: MPL-2.0
 """
@@ -233,8 +233,14 @@ class PgmJsonConverter(BaseConverter[StructuredData]):
         # For example: {"node": [{"id": 0, ...}, {"id": 1, ...}], "line": [{"id": 2, ...}]}
         return {
             component: [
-                {attribute: obj[attribute].tolist() for attribute in objects.dtype.names if not is_nan(obj[attribute])}
-                | extra_info.get(obj["id"], {})
+                dict(
+                    **{
+                        attribute: obj[attribute].tolist()
+                        for attribute in objects.dtype.names
+                        if not is_nan(obj[attribute])
+                    },
+                    **extra_info.get(obj["id"], {}),
+                )
                 for obj in objects
             ]
             for component, objects in data.items()
