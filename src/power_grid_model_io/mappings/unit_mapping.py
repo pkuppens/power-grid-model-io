@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 Contributors to the Power Grid Model IO project <dynamic.grid.calculation@alliander.com>
+# SPDX-FileCopyrightText: 2022 Contributors to the Power Grid Model project <dynamic.grid.calculation@alliander.com>
 #
 # SPDX-License-Identifier: MPL-2.0
 """
@@ -61,7 +61,7 @@ class UnitMapping:
                         raise ValueError(
                             f"Invalid unit definition for '{unit}': 1{unit} cannot be {multiplier}{si_unit}"
                         )
-                    continue
+                    continue  # pragma: no cover (bug in python 3.9)
                 self._mapping[unit] = (multiplier, si_unit)
         self._log.debug(
             "Set unit definitions", n_units=len(self._si_units | self._mapping.keys()), n_si_units=len(self._si_units)
